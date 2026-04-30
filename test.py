@@ -6,7 +6,8 @@ height = 720
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Parking Peral")
 
-level = 1
+level = 0
+clock = pygame.time.Clock()
 
 garage_bottom = pygame.image.load("garage-bottom.jpg")
 garage_bottom = pygame.transform.scale(garage_bottom,(width,height))
@@ -61,9 +62,6 @@ while running:
         rotated_user = pygame.transform.flip(user,True,False)
     else:
         rotated_user = user
-    
-
-
     screen.blit(rotated_user,(user_x,user_y))
 
     elapsed_time = (pygame.time.get_ticks() - start_time) / 1000
@@ -75,5 +73,6 @@ while running:
     screen.blit(timer,timer_rect)
 
     pygame.display.flip()
+    clock.tick(60)  # limit to 60 FPS
 
 pygame.quit()
