@@ -26,7 +26,7 @@ speed = 5
 
 direction = "right"
 
-time_limit = 60
+time_limit = 90
 font = pygame.font.SysFont(None, 50)
 
 # START SCREEN SETUP
