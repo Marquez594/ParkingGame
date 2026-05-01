@@ -4,7 +4,7 @@ pygame.init()
 width = 1280
 height = 720
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Parking Peral")
+pygame.display.set_caption("Parking Peril")
 
 level = 0
 clock = pygame.time.Clock()
