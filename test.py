@@ -30,7 +30,7 @@ time_limit = 60
 font = pygame.font.SysFont(None, 50)
 
 # START SCREEN SETUP
-car_parc = pygame.image.load("CarParc.jpeg")
+car_parc = pygame.image.load("titlescreen.jpg")
 car_parc = pygame.transform.scale(car_parc, (width, height))
 
 selected_difficulty = "easy"
