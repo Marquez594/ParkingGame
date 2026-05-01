@@ -26,10 +26,64 @@ speed = 5
 
 direction = "right"
 
-start_time = pygame.time.get_ticks()
 time_limit = 60
 font = pygame.font.SysFont(None, 50)
 
+# START SCREEN SETUP
+car_parc = pygame.image.load("CarParc.jpeg")
+car_parc = pygame.transform.scale(car_parc, (width, height))
+
+selected_difficulty = "easy"
+game_started = False
+
+def draw_button(text, x, y, w, h, color, text_color=(255,255,255)):
+    pygame.draw.rect(screen, color, (x, y, w, h), border_radius=12)
+    label = font.render(text, True, text_color)
+    label_rect = label.get_rect(center=(x + w//2, y + h//2))
+    screen.blit(label, label_rect)
+    return pygame.Rect(x, y, w, h)
+
+while not game_started:
+    screen.blit(car_parc, (0, 0))
+    overlay = pygame.Surface((width, height), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 140))
+    screen.blit(overlay, (0, 0))
+    title_font = pygame.font.SysFont(None, 90)
+    title = title_font.render("Parking Peral", True, (255, 255, 255))
+    screen.blit(title, title.get_rect(center=(width//2, 180)))
+    diff_label = font.render("Select Difficulty:", True, (255, 255, 255))
+    screen.blit(diff_label, diff_label.get_rect(center=(width//2, 310)))
+    easy_color   = (0, 180, 0)   if selected_difficulty == "easy"   else (80, 80, 80)
+    medium_color = (200, 140, 0) if selected_difficulty == "medium" else (80, 80, 80)
+    hard_color   = (180, 0, 0)   if selected_difficulty == "hard"   else (80, 80, 80)
+    easy_btn   = draw_button("Easy",   width//2 - 310, 360, 180, 60, easy_color)
+    medium_btn = draw_button("Medium", width//2 - 90,  360, 180, 60, medium_color)
+    hard_btn   = draw_button("Hard",   width//2 + 130, 360, 180, 60, hard_color)
+    start_btn  = draw_button("START",  width//2 - 110, 480, 220, 70, (30, 30, 200))
+    pygame.display.flip()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if easy_btn.collidepoint(event.pos):
+                selected_difficulty = "easy"
+            elif medium_btn.collidepoint(event.pos):
+                selected_difficulty = "medium"
+            elif hard_btn.collidepoint(event.pos):
+                selected_difficulty = "hard"
+            elif start_btn.collidepoint(event.pos):
+                game_started = True
+                if selected_difficulty == "easy":
+                    speed = 4
+                elif selected_difficulty == "medium":
+                    speed = 7
+                elif selected_difficulty == "hard":
+                    speed = 11
+    clock.tick(60)
+# START SCREEN END
+
+start_time = pygame.time.get_ticks()
 running = True
 while running:
     for event in pygame.event.get():
