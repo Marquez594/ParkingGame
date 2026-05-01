@@ -76,10 +76,13 @@ while not game_started:
                 game_started = True
                 if selected_difficulty == "easy":
                     speed = 4
+                    time_limit = 90
                 elif selected_difficulty == "medium":
                     speed = 7
+                    time_limit = 60
                 elif selected_difficulty == "hard":
                     speed = 11
+                    time_limit = 30
     clock.tick(60)
 # START SCREEN END
 
