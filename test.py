@@ -74,6 +74,7 @@ while not game_started:
                 selected_difficulty = "hard"
             elif start_btn.collidepoint(event.pos):
                 game_started = True
+                print(f"Difficulty: {selected_difficulty}, Time: {time_limit}")
                 if selected_difficulty == "easy":
                     speed = 4
                     time_limit = 90
