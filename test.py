@@ -3,16 +3,6 @@ import random
 num_spots = 6
 parking_spots = []
 
-def refresh_spawns():
-    global parking_spots
-    parking_spots = []
-
-    for i in range(num_spots):
-        if random.random() < 0.7:
-            parking_spots.append(True)
-        else: 
-            parking_spots.append(False)
-
 pygame.init() 
 width = 1280
 height = 720
@@ -34,18 +24,20 @@ garage_top = pygame.transform.scale(garage_top,(width,height))
 
 level = 0
 
-parked_car = pygame.image.load("parkedcar.jpeg")
+parked_car = pygame.image.load("parkedcar.png")
 parked_car = pygame.transform.scale(parked_car, (200, 200))
 
-user = pygame.image.load("user.png")
+user = pygame.image.load("user.webp")
 user = pygame.transform.scale(user,(200,200))
 user_x = width//2
 user_y = height//1.5
-speed = 8
+speed = 10
+probability = 0.8
+
 
 direction = "right"
 
-time_limit = 90
+time_limit = 60
 font = pygame.font.SysFont(None, 50)
 
 # START SCREEN SETUP
@@ -94,32 +86,35 @@ while not game_started:
             elif start_btn.collidepoint(event.pos):
                 game_started = True
                 print(f"Difficulty: {selected_difficulty}, Time: {time_limit}")
-                if selected_difficulty == "easy":
-                    speed = 4
-                    time_limit = 90
-                elif selected_difficulty == "medium":
-                    speed = 7
-                    time_limit = 60
+                if selected_difficulty == "medium":
+                    probability = 0.9
                 elif selected_difficulty == "hard":
-                    speed = 11
-                    time_limit = 30
+                    probability = 0.95
+
     clock.tick(60)
 # START SCREEN END
 
 
 start_time = pygame.time.get_ticks()
-refresh_spawns()
+
+
 def refresh_spawns():
     global parking_spots
     parking_spots = []
 
     for i in range(num_spots):
 
-        if random.random() < 0.7:
+        if random.random() < probability:
             parking_spots.append(1)
         else: 
             parking_spots.append(0)
+refresh_spawns()
+spot_width = 120
 
+gap = 60
+y = 450
+
+start_x = (width - (num_spots * spot_width + (num_spots -1 ) * gap )) //2
     
 running = True
 while running:
@@ -128,24 +123,18 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                
+                for i in range(num_spots):
+                    x = start_x + i * (spot_width + gap)
 
-                spot_width = 120
-        gap = 40
-        start_x = (width - (num_spots * (spot_width + gap))) // 2
+                    # check if player is in this spot
+                    if abs(user_x - x) < 40 and abs(user_y - y ) < 50:
 
-        for i in range(num_spots):
-            x = start_x + i * (spot_width + gap)
-
-            # check if player is in this spot
-            if abs(user_x - x) < 40:
-
-                # only allow parking if empty
-                if parking_spots[i] == 0:
-                    parking_spots[i] = 2  # parked successfully
-                    print("Parked!")
-                else:
-                    print("Spot taken!")
+                        # only allow parking if empty
+                        if parking_spots[i] == 0:
+                            parking_spots[i] = 2  # parked successfully
+                            print("Parked!")
+                        else:
+                            print("Spot taken!")
     
     keys = pygame.key.get_pressed()
 
@@ -171,37 +160,16 @@ while running:
         screen.blit(garage_top,(0,0))
     else:
         screen.blit(garage_middle,(0,0))
-    spot_width = 120
-    gap = 40
-    start_x = (width - (num_spots * (spot_width + gap))) // 2
 
-    for i in range(num_spots): 
+    for i in range(num_spots):
         x = start_x + i * (spot_width + gap)
 
-        parking_rows = [height // 2 - 100,
-                        height // 2,
-                        height // 2 + 100
-        ]
-        parking_rows = [200, 300, 400]
-
-        print("parking_rows =", parking_rows)
-        print("length =", len(parking_rows))
-
-        y = parking_rows[0]
-        y = parking_rows[1]
-        y = parking_rows[2]
+        if parking_spots[i]:
+            screen.blit(parked_car,(x,y))
 
 
-        pygame.draw.rect(screen, (0,200,0), (x, y, spot_width, 60))
+    
 
-
-        if abs(user_y - parking_rows[1]) < 30:
-            user_y = parking_rows[1]
-
-        if parking_spots[i]: 
-            screen.blit(parked_car, (x, y))
-        else: 
-            pygame.draw.rect(screen, (0, 200, 0), (x, y, spot_width, 60)) 
     
     #Makes player model flip to give that left/right feel
     if direction == "left":
