@@ -1,10 +1,24 @@
 import pygame
+import random 
+num_spots = 6
+parking_spots = []
+
+def refresh_spawns():
+    global parking_spots
+    parking_spots = []
+
+    for i in range(num_spots):
+        if random.random() < 0.7:
+            parking_spots.append(True)
+        else: 
+            parking_spots.append(False)
 
 pygame.init() 
 width = 1280
 height = 720
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Parking Peril")
+
 
 level = 0
 clock = pygame.time.Clock()
@@ -18,11 +32,16 @@ garage_middle = pygame.transform.scale(garage_middle,(width,height))
 garage_top = pygame.image.load("garage-top.webp")
 garage_top = pygame.transform.scale(garage_top,(width,height))
 
+level = 0
+
+parked_car = pygame.image.load("parkedcar.jpeg")
+parked_car = pygame.transform.scale(parked_car, (200, 200))
+
 user = pygame.image.load("user.png")
 user = pygame.transform.scale(user,(200,200))
 user_x = width//2
-user_y = height//2 + 100
-speed = 5
+user_y = height//1.5
+speed = 8
 
 direction = "right"
 
@@ -49,7 +68,7 @@ while not game_started:
     overlay.fill((0, 0, 0, 140))
     screen.blit(overlay, (0, 0))
     title_font = pygame.font.SysFont(None, 90)
-    title = title_font.render("Parking Peral", True, (255, 255, 255))
+    title = title_font.render("Parking Peril", True, (255, 255, 255))
     screen.blit(title, title.get_rect(center=(width//2, 180)))
     diff_label = font.render("Select Difficulty:", True, (255, 255, 255))
     screen.blit(diff_label, diff_label.get_rect(center=(width//2, 310)))
@@ -87,12 +106,46 @@ while not game_started:
     clock.tick(60)
 # START SCREEN END
 
+
 start_time = pygame.time.get_ticks()
+refresh_spawns()
+def refresh_spawns():
+    global parking_spots
+    parking_spots = []
+
+    for i in range(num_spots):
+
+        if random.random() < 0.7:
+            parking_spots.append(1)
+        else: 
+            parking_spots.append(0)
+
+    
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                
+
+                spot_width = 120
+        gap = 40
+        start_x = (width - (num_spots * (spot_width + gap))) // 2
+
+        for i in range(num_spots):
+            x = start_x + i * (spot_width + gap)
+
+            # check if player is in this spot
+            if abs(user_x - x) < 40:
+
+                # only allow parking if empty
+                if parking_spots[i] == 0:
+                    parking_spots[i] = 2  # parked successfully
+                    print("Parked!")
+                else:
+                    print("Spot taken!")
     
     keys = pygame.key.get_pressed()
 
@@ -100,12 +153,16 @@ while running:
     if keys[pygame.K_a] or keys[pygame.K_LEFT]:
         user_x -= speed
         direction = "left"
-    if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+    elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
         user_x += speed
         direction = "right"
     
+    
+  
+
     #makes sure player does not go past the game border
     user_x = max(0,min(user_x,width-200))
+
 
     #Handle different background when player goes up/down levels
     if (level == 0):
@@ -114,13 +171,44 @@ while running:
         screen.blit(garage_top,(0,0))
     else:
         screen.blit(garage_middle,(0,0))
+    spot_width = 120
+    gap = 40
+    start_x = (width - (num_spots * (spot_width + gap))) // 2
+
+    for i in range(num_spots): 
+        x = start_x + i * (spot_width + gap)
+
+        parking_rows = [height // 2 - 100,
+                        height // 2,
+                        height // 2 + 100
+        ]
+        parking_rows = [200, 300, 400]
+
+        print("parking_rows =", parking_rows)
+        print("length =", len(parking_rows))
+
+        y = parking_rows[0]
+        y = parking_rows[1]
+        y = parking_rows[2]
+
+
+        pygame.draw.rect(screen, (0,200,0), (x, y, spot_width, 60))
+
+
+        if abs(user_y - parking_rows[1]) < 30:
+            user_y = parking_rows[1]
+
+        if parking_spots[i]: 
+            screen.blit(parked_car, (x, y))
+        else: 
+            pygame.draw.rect(screen, (0, 200, 0), (x, y, spot_width, 60)) 
     
     #Makes player model flip to give that left/right feel
     if direction == "left":
         rotated_user = pygame.transform.flip(user,True,False)
     else:
         rotated_user = user
-    screen.blit(rotated_user,(user_x,user_y))
+    screen.blit(rotated_user, (int(user_x), int(user_y)))
 
     elapsed_time = (pygame.time.get_ticks() - start_time) / 1000
     remaining_time = max(0,time_limit - int(elapsed_time))
@@ -128,8 +216,10 @@ while running:
     timer = font.render(f"Time: {remaining_time}s",True,(255,255,255))
 
     timer_rect = timer.get_rect(center=(width//2,30))
-    screen.blit(timer,timer_rect)
+    screen.blit(timer, (width//2 - 80, 10))
 
+    help_text = font.render("Go to edges + press SPACE (Left=Down, Right=Up)", True, (255,255,255))
+    screen.blit(help_text, (20, 680))
     pygame.display.flip()
     clock.tick(60)  # limit to 60 FPS
 
