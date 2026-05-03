@@ -119,8 +119,9 @@ y = 450
 
 level_swap = False
 
-start_x = (width - (num_spots * spot_width + (num_spots -1 ) * gap )) //2
-
+start_x = (width - (num_spots * spot_width + (num_spots -1 ) * gap )) //2 - 50
+frozen = False
+pause_start = None
 
     
 running = True
@@ -129,65 +130,75 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                if reverse:
-                    if user_x < 50 and level != 0:
-                        level = max(0,level-1)
-                        refresh_spawns()
-                        direction = "left"
-                        
-                    elif user_x > width - 250 and level != 8:
-                        level = min(8,level+1)
-                        refresh_spawns()
-                        direction = "right"
-                        
+            if not frozen:
+                if event.key == pygame.K_SPACE:
+                    if reverse:
+                        if user_x < 50 and level != 0:
+                            level = max(0,level-1)
+                            refresh_spawns()
+                            direction = "left"
+                            
+                        elif user_x > width - 250 and level != 8:
+                            level = min(8,level+1)
+                            refresh_spawns()
+                            direction = "right"
+                            
+                        else:
+                            for i in range(num_spots):
+                                x = start_x + i * (spot_width + gap)
+
+                                # check if player is in this spot
+                                if abs(user_x - x) < 40 and abs(user_y - y ) < 50:
+
+                                    # only allow parking if empty
+                                    if parking_spots[i] == 0:
+                                        parking_spots[i] = 2  # parked successfully
+                                        print("Parked!")
+                                        #Set Pause 
+                                        pause_start = pygame.time.get_ticks()
+                                        frozen = True
+                                    else:
+                                        print("Spot taken!")
                     else:
-                        for i in range(num_spots):
-                            x = start_x + i * (spot_width + gap)
+                        if user_x < 50 and level != 0:
+                            level = max(0,level+1)
+                            refresh_spawns()
+                            direction = "left"
+                            
+                        elif user_x > width - 250 and level != 8:
+                            level = min(8,level-1)
+                            refresh_spawns()
+                            direction = "right"
+                            
+                        else:
+                            for i in range(num_spots):
+                                x = start_x + i * (spot_width + gap)
 
-                            # check if player is in this spot
-                            if abs(user_x - x) < 40 and abs(user_y - y ) < 50:
+                                # check if player is in this spot
+                                if abs(user_x - x) < 40 and abs(user_y - y ) < 50:
 
-                                # only allow parking if empty
-                                if parking_spots[i] == 0:
-                                    parking_spots[i] = 2  # parked successfully
-                                    print("Parked!")
-                                else:
-                                    print("Spot taken!")
-                else:
-                    if user_x < 50 and level != 0:
-                        level = max(0,level+1)
-                        refresh_spawns()
-                        direction = "left"
-                        
-                    elif user_x > width - 250 and level != 8:
-                        level = min(8,level-1)
-                        refresh_spawns()
-                        direction = "right"
-                        
-                    else:
-                        for i in range(num_spots):
-                            x = start_x + i * (spot_width + gap)
-
-                            # check if player is in this spot
-                            if abs(user_x - x) < 40 and abs(user_y - y ) < 50:
-
-                                # only allow parking if empty
-                                if parking_spots[i] == 0:
-                                    parking_spots[i] = 2  # parked successfully
-                                    print("Parked!")
-                                else:
-                                    print("Spot taken!")
+                                    # only allow parking if empty
+                                    if parking_spots[i] == 0:
+                                        parking_spots[i] = 2  # parked successfully
+                                        print("Parked!")
+                                        #Set pause
+                                        pause_start = pygame.time.get_ticks()
+                                        frozen = True
+                                    else:
+                                        print("Spot taken!")
     
     keys = pygame.key.get_pressed()
 
     #User movement
-    if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-        user_x -= speed
-        direction = "left"
-    elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-        user_x += speed
-        direction = "right"
+    #if frozen is true then user cannot move
+    #else they can move
+    if not frozen:
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+            user_x -= speed
+            direction = "left"
+        elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            user_x += speed
+            direction = "right"
     
     
   
@@ -221,14 +232,23 @@ while running:
         rotated_user = user
     screen.blit(rotated_user, (int(user_x), int(user_y)))
 
-    elapsed_time = (pygame.time.get_ticks() - start_time) / 1000
+    #Pause timer if frozen true
+    if frozen:
+        elapsed_time = (pause_start - start_time) / 1000
+    else:
+        elapsed_time = (pygame.time.get_ticks() - start_time) / 1000
     remaining_time = max(0,time_limit - int(elapsed_time))
+
+    #set frozen true and pause if player has reached time limit
+    if remaining_time <= 0:
+        pause_start = pygame.time.get_ticks()
+        frozen = True
 
     timer = font.render(f"Time: {remaining_time}s",True,(255,255,255))
 
     timer_rect = timer.get_rect(center=(width//2,30))
     screen.blit(timer, (width//2 - 80, 10))
-    level_text = font.render(f"Level: {level}", True, (255, 255, 255))
+    level_text = font.render(f"Floor: {level}", True, (255, 255, 255))
     screen.blit(level_text, (20, 20))
     if reverse:
         help_text = font.render("Go to edges + press SPACE (Left=Down, Right=Up)", True, (255,255,255))
