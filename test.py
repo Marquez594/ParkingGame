@@ -114,6 +114,8 @@ spot_width = 120
 gap = 60
 y = 450
 
+level_swap = False
+
 start_x = (width - (num_spots * spot_width + (num_spots -1 ) * gap )) //2
     
 running = True
@@ -123,18 +125,29 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                for i in range(num_spots):
-                    x = start_x + i * (spot_width + gap)
+                if user_x < 50 and level != 0:
+                    level = max(0,level-1)
+                    refresh_spawns()
+                    direction = "left"
+                    
+                elif user_x > width - 250 and level != 8:
+                    level = min(8,level+1)
+                    refresh_spawns()
+                    direction = "right"
+                    
+                else:
+                    for i in range(num_spots):
+                        x = start_x + i * (spot_width + gap)
 
-                    # check if player is in this spot
-                    if abs(user_x - x) < 40 and abs(user_y - y ) < 50:
+                        # check if player is in this spot
+                        if abs(user_x - x) < 40 and abs(user_y - y ) < 50:
 
-                        # only allow parking if empty
-                        if parking_spots[i] == 0:
-                            parking_spots[i] = 2  # parked successfully
-                            print("Parked!")
-                        else:
-                            print("Spot taken!")
+                            # only allow parking if empty
+                            if parking_spots[i] == 0:
+                                parking_spots[i] = 2  # parked successfully
+                                print("Parked!")
+                            else:
+                                print("Spot taken!")
     
     keys = pygame.key.get_pressed()
 
@@ -185,6 +198,8 @@ while running:
 
     timer_rect = timer.get_rect(center=(width//2,30))
     screen.blit(timer, (width//2 - 80, 10))
+    level_text = font.render(f"Level: {level}", True, (255, 255, 255))
+    screen.blit(level_text, (20, 20))
 
     help_text = font.render("Go to edges + press SPACE (Left=Down, Right=Up)", True, (255,255,255))
     screen.blit(help_text, (20, 680))
