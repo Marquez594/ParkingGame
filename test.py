@@ -243,6 +243,13 @@ while running:
     if remaining_time <= 0:
         pause_start = pygame.time.get_ticks()
         frozen = True
+        running = False
+        game_result = "lose"
+    
+    # check if player parked successfully
+    if 2 in parking_spots and frozen:
+        running = False
+        game_result = "win"
 
     timer = font.render(f"Time: {remaining_time}s",True,(255,255,255))
 
@@ -258,4 +265,32 @@ while running:
     pygame.display.flip()
     clock.tick(60)  # limit to 60 FPS
 
-pygame.quit()
+# END SCREEN
+while True:
+    screen.blit(car_parc, (0, 0))
+    overlay = pygame.Surface((width, height), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 140))
+    screen.blit(overlay, (0, 0))
+    title_font = pygame.font.SysFont(None, 90)
+    
+    if game_result == "win":
+        msg = title_font.render("You Win!", True, (0, 255, 0))
+        sub = font.render("You found a parking spot!", True, (255, 255, 255))
+    else:
+        msg = title_font.render("Game Over!", True, (255, 60, 60))
+        sub = font.render("You ran out of time!", True, (255, 255, 255))
+
+    screen.blit(msg, msg.get_rect(center=(width//2, 250)))
+    screen.blit(sub, sub.get_rect(center=(width//2, 350)))
+    quit_btn = draw_button("QUIT", width//2 - 110, 450, 220, 70, (80, 80, 80))
+    pygame.display.flip()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if quit_btn.collidepoint(event.pos):
+                pygame.quit()
+                exit()
+    clock.tick(60)
