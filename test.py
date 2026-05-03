@@ -26,7 +26,7 @@ level = 0
 
 parked_car = pygame.image.load("parkedcar.png")
 parked_car = pygame.transform.scale(parked_car, (200, 200))
-
+#
 user = pygame.image.load("user.webp")
 user = pygame.transform.scale(user,(200,200))
 user_x = width//2
