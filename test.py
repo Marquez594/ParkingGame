@@ -282,7 +282,8 @@ while True:
 
     screen.blit(msg, msg.get_rect(center=(width//2, 250)))
     screen.blit(sub, sub.get_rect(center=(width//2, 350)))
-    quit_btn = draw_button("QUIT", width//2 - 110, 450, 220, 70, (80, 80, 80))
+   quit_btn   = draw_button("QUIT",   width//2 + 20,  450, 200, 70, (80, 80, 80))
+   replay_btn = draw_button("REPLAY", width//2 - 230, 450, 200, 70, (30, 30, 200))
     pygame.display.flip()
 
     for event in pygame.event.get():
@@ -292,5 +293,11 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if quit_btn.collidepoint(event.pos):
                 pygame.quit()
+                exit()
+            elif replay_btn.collidepoint(event.pos):
+                pygame.quit()
+                import subprocess
+                import sys
+                subprocess.Popen([sys.executable, __file__])
                 exit()
     clock.tick(60)
