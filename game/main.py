@@ -6,6 +6,7 @@ import sys
 
 pygame.init()
 
+#Array of parking spots and we have a max spots of 6
 num_spots = 6
 parking_spots = []
 
@@ -16,6 +17,8 @@ pygame.display.set_caption("Parking Peril")
 
 level = 0
 clock = pygame.time.Clock()
+
+#Function to make sure our files are correctly loaded
 
 def safe_load(path, size):
     try:
@@ -35,6 +38,7 @@ user = None
 car_parc = None
 
 async def load_assets():
+    #Here we access our files and if there is an error the exception handles it
     global garage_bottom, garage_middle, garage_top
     global parked_car, user, car_parc
 
@@ -51,8 +55,10 @@ async def load_assets():
 
 user_x = width // 2
 user_y = height // 1.5
+#Set our base variables for the game
 speed = 11
 probability = 0.95
+#Used to flip the car when the player changes direction 
 direction = "right"
 
 time_limit = 60
@@ -82,6 +88,7 @@ async def start_screen():
     global selected_difficulty, probability, game_started
 
     while not game_started:
+        #Here is our game menu where the player can change the difficulty 
         screen.blit(car_parc, (0, 0))
 
         overlay = pygame.Surface((width, height), pygame.SRCALPHA)
@@ -119,6 +126,7 @@ async def start_screen():
                 elif hard_btn.collidepoint(event.pos):
                     selected_difficulty = "hard"
                 elif start_btn.collidepoint(event.pos):
+                    #Changes the probability that a parking spot will have a spot
                     game_started = True
                     if selected_difficulty == "medium":
                         probability = 0.97
@@ -130,12 +138,19 @@ async def start_screen():
 
 
 def refresh_spawns():
+    #This is our function that loads the parked car
     global parking_spots, reverse
     reverse = not reverse
-    parking_spots = [
-        1 if random.random() < probability else 0
-        for _ in range(num_spots)
-    ]
+    parking_spots = []
+    
+    for i in range(num_spots):
+        #For the array parking_spots we have a chance to not load a parked car depending on the probability 
+        rand_value = random.random()
+    
+        if rand_value < probability:
+            parking_spots.append(1)
+        else:
+            parking_spots.append(0)
 
 def reset_game():
     global level, user_x, parking_spots, game_started
@@ -153,6 +168,7 @@ async def game_loop():
     frozen = False
     pause_start = None
 
+    #Used to space out the parking spots
     spot_width = 120
     gap = 60
     y = 450
@@ -173,12 +189,13 @@ async def game_loop():
                 if not frozen and event.key == pygame.K_SPACE:
                     at_left = user_x < 50
                     at_right = user_x > width - 250
-
+                    #This is what makes the player have to go to the other side to go up levels
                     if at_left and level != 0:
                         if reverse:
                             level = min(8, level + 1)
                         else:
                             level = max(0, level - 1)
+                        #Call refresh spawns when level changes
                         refresh_spawns()
 
                     elif at_right and level != 8:
@@ -217,7 +234,7 @@ async def game_loop():
 
         user_x = max(0, min(user_x, width - 200))
 
-        # BACKGROUND
+        # Background images changes depending on floor
         if level == 0:
             screen.blit(garage_bottom, (0, 0))
         elif level == 8:
@@ -259,6 +276,7 @@ async def game_loop():
         screen.blit(timer, (width // 2 - 80, 10))
         level_text = font.render(f"Floor: {level}", True, (255, 255, 255))
         screen.blit(level_text, (20, 20))
+        #Give user some useful info
         if reverse:
             help_text = font.render("Go to edges + press SPACE (Left=Up, Right=Down, SPACE to park", True, (255,255,255))
         else:
@@ -272,7 +290,7 @@ async def game_loop():
     return game_result
 
 
-# ---------------- END SCREEN ----------------
+# END Screen
 async def end_screen(game_result):
     while True:
         screen.blit(car_parc, (0, 0))
